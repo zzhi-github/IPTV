@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#ffffff">
+<title>IPTV By ChatBot</title>
+<style>
+/* The list style with an arrow before the selected item */
+div.menu #menu {
+  list-style-type: none;
+}
+
+#menu li {
+  position: relative;
+  padding-left: 10px;
+  cursor: pointer;
+}
+
+#menu li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+  border-left: 6px solid #ffffff;
+}
+
+#menu li.selected::before {
+  border-left-color: blue;
+}
+		
+/* Make the background color of the page match the system background */
+body {
+			background-color: #ffffff;
+			color: #222222;
+			transition: background-color 0.5s ease;
+}
+@media (prefers-color-scheme: dark) {
+	body {
+				background-color: #222222;
+				color: #ffffff;
+	}
+	
+	#menu li::before {
+		border-left-color: rgba(34, 34, 34, 0.5);
+	}
+
+	#menu li.selected::before {
+		border-left-color: #ff0000;
+	}		
+}
+
+@media (prefers-color-scheme: light) {
+		body {
+		background-color: #ffffff;
+		color: #222222;
+		}
+
+		#menu li::before {
+		border-left-color: #ffffff;
+		}
+
+		#menu li.selected::before {
+		border-left-color: blue;
+		}
+}
+/* The layout of the page */
+.container {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+}
+
+.video {
+  width: 80%;
+  height: 100%;
+  display: flex;
+  margin-right: 10px;
+}
+
+.menu {
+  width: 20%;
+  height: 100%;
+  position: relative;
+  overflow-y:scroll;
+}
+
+select {
+  position: absolute;
+  top: 2em;
+}
+
+.menu-text {
+  position: absolute;
+}
+
+video {
+  display: none;
+}
+</style>
+</head>
+<body onload="loadM3U('https://live.fanmingming.com/tv/m3u/ipv6.m3u')">
+
+<h1> <img src="./IPTVImages/titleLogo.png" alt="IPTV Title" /> </h1>
+
+<div class="container">
+  <div class="video">
+    <video id="myVideo" width="100%" height="auto" controls>
+      <source src="movie.m3u8" type="application/x-mpegURL">
+      Your browser does not support the video tag.
+    </video>
+    <img id="myImage" src="./IPTVImages/frontPage.png" alt="TV logos" style="width:100%;display:block;">
+  </div>
+  
+  <div class="menu">
+    <div class="loading-message">Loading menu...</div>
+    <ul id="menu">
+      <li onclick="document.getElementById('myVideo').src = 'https://cbsn-us.cbsnstream.cbsnews.com/out/v1/55a8648e8f134e82a470f83d562deeca/master.m3u8'; document.getElementById('myVideo').style.display = 'block'; document.getElementById('myImage').style.display = 'none';">CBSN 720p</li>
+      <li onclick="document.getElementById('myVideo').src = 'https://www.cbsnews.com/common/video/cbsn-ny-prod.m3u8'; document.getElementById('myVideo').style.display = 'block'; document.getElementById('myImage').style.display = 'none';">CBSN New York</li>
+      <li onclick="document.getElementById('myVideo').src = 'https://d1mpprlbe8tn2j.cloudfront.net/v1/master/7b67fbda7ab859400a821e9aa0deda20ab7ca3d2/euronewsLive/87O7AhxRUdeeIVqf/ewnsabren_eng.m3u8'; document.getElementById('myVideo').style.display = 'block'; document.getElementById('myImage').style.display = 'none';">Euro News</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+	var listItems = document.querySelectorAll("#menu li");
+	for (var i = 0; i < listItems.length; i++) {
+		listItems[i].addEventListener("click", function() {
+			var selected = document.querySelector("#menu li.selected");
+			if (selected) {
+				selected.classList.remove("selected");
+			}
+			this.classList.add("selected");
+		});
+	}
+	
+    function loadM3U(url) {
+        fetch(url)
+            .then(response => response.text())
+            .then(data => {
+                let sources = [];
+                let lines = data.split('\n');
+                let name = '';
+                for (let i = 0; i < lines.length; i++) {
+                    let line = lines[i].trim();
+                    if (line.startsWith('#EXTINF')) {
+                        let match = line.match(/group-title="([^"]+)",(.+)/);
+                        name = match ? match[2] : '';
+                    } else if (line.startsWith('http')) {
+                        sources.push({
+                            url: line.trim(),
+                            name: name
+                        });
+                    }
+                }
+                generateMenu(sources);
+                updateMenuSize();
+            })
+            .catch(error => {
+                console.error(error);
+            });
+    }
+
+    function generateMenu(sources) {
+        let videoContainer = document.querySelector('.video');
+        let menuContainer = document.querySelector('.menu');
+        let menu = document.getElementById('menu');
+        let loadingMessage = menuContainer.querySelector('.loading-message');
+        loadingMessage.style.display = 'block';        
+        sources.forEach(source => {
+            let item = document.createElement('li');
+            item.textContent = source.name;
+            item.onclick = function() {
+                document.getElementById('myVideo').src = source.url;
+                document.getElementById('myVideo').style.display = 'block';
+                document.getElementById('myImage').style.display = 'none';
+                let selected = document.querySelector("#menu li.selected");
+                if (selected) {
+                  selected.classList.remove("selected");
+                }
+                item.classList.add("selected");                
+            };
+            menu.appendChild(item);
+        });
+        loadingMessage.style.display = 'none';
+    }	
+	
+    function updateMenuSize() {
+        let videoContainer = document.querySelector('.video');
+        let menuContainer = document.querySelector('.menu');
+        let videoHeight = videoContainer.offsetHeight;
+        menuContainer.style.height = videoHeight + 'px';
+    }
+
+    window.addEventListener('resize', updateMenuSize);	
+</script>
+</body>
+</html>
