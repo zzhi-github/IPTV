@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body {
+  font-family: "Lato", sans-serif;
+}
+ 
+.sidenav {
+  height: auto;
+  width: 0;
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: 0;
+//  background-color: #111;
+  background-color: rgba(0, 0, 0, 0.8);
+//  backdrop-filter: blur(20px);
+//  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  overflow-x: hidden;
+  overflow-y: hidden;
+  transition: 0.5s;
+  padding-top: 60px;
+}
+
+.sidenav a {
+  padding: 8px 8px 8px 32px;
+  text-decoration: none;
+//  font-size: 25px;
+  color: #818181;
+  display: block;
+  transition: 0.3s;
+}
+
+.sidenav a.active {
+  color: yellow;
+}
+
+.sidenav a:hover {
+  color: yellow;
+}
+
+.sidenav .closebtn {
+  position: absolute;
+  top: 0;
+  right: 10px;
+  font-size: 25px;
+  margin-left: 50px;
+}
+
+.refresh-btn {
+  position: absolute;
+  top: 0;
+  left: 0px;
+  //cursor: pointer;
+  //color: #818181; 
+  font-size: 25px;
+}
+
+.sidenav .menu-items {
+  overflow-x: hidden;
+  overflow-y: auto;
+  max-height: calc(100% - 20px);
+}
+
+@media screen and (max-height: 450px) {
+  .sidenav {padding-top: 15px;}
+  .sidenav a {font-size: 18px;}
+}
+
+#contentImage {
+  width: 100%;
+  height: auto;
+}
+</style>
+</head>
+<body>
+
+<div id="mySidenav" class="sidenav">
+  <a href="#" class="refresh-btn" onclick="refreshMenu()">&#8634;</a>
+  <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+  <div id="menu" class="menu-items">
+  <a href="#" onclick="setActive(this)" data-video-url="https://cbsn-us.cbsnstream.cbsnews.com/out/v1/55a8648e8f134e82a470f83d562deeca/master.m3u8">CBSN&nbsp;720p</a>
+  <a href="#" onclick="setActive(this)" data-video-url="https://www.cbsnews.com/common/video/cbsn-ny-prod.m3u8">CBSN&nbsp;NY</a>
+  <a href="#" onclick="setActive(this)" data-video-url="https://d1mpprlbe8tn2j.cloudfront.net/v1/master/7b67fbda7ab859400a821e9aa0deda20ab7ca3d2/euronewsLive/87O7AhxRUdeeIVqf/ewnsabren_eng.m3u8">Euro&nbsp;News</a>
+  <!--a href="#" onclick="setActive(this)">Contact</a>
+  <a href="#" onclick="setActive(this)">ClientsX</a>
+  <a href="#" onclick="setActive(this)">ContactX</a>  
+  <a href="#" onclick="setActive(this)">Clients</a>
+  <a href="#" onclick="setActive(this)">Contact</a>
+  <a href="#" onclick="setActive(this)">ClientsX</a>
+  <a href="#" onclick="setActive(this)">ContactX</a-->
+  </div>    
+</div>
+
+<h2><img src="./IPTVImages/titleLogo.png" alt="IPTV Title" /></h2>
+<!--p>Click "Menu" to open the side navigation menu.</p-->
+<span style="font-size:20px;cursor:pointer" onclick="openNav()">&#9776; TV Menu</span>
+
+<div id="imageContainer">
+  <!--img id="contentImage" src="./IPTVImages/frontPage.png" alt="Content Image" style="width: 100%;"-->
+  <video id="contentImage" controls poster="./IPTVImages/frontPage.png">
+    <source src="" type="application/x-mpegURL">
+  </video>
+</div>
+
+<script>
+function openNav() {
+  var menuItems = document.querySelectorAll(".sidenav a");
+  
+  if (menuItems.length <= 5) {
+    // Call loadM3U() to fetch the video sources and generate the menu
+    var refreshBtn = document.querySelector(".refresh-btn");
+    var fontsize = window.getComputedStyle(refreshBtn).getPropertyValue("font-size");
+    refreshBtn.style.fontSize = "10px";
+    refreshBtn.innerHTML = "Loading ...";
+    loadM3U("https://live.fanmingming.com/tv/m3u/ipv6.m3u").then(function() {
+      refreshBtn.style.fontSize = fontsize;
+      refreshBtn.innerHTML = "&#8634;";
+    }).catch(function(error) {
+      console.log(error);
+      refreshBtn.style.fontSize = fontsize;
+      refreshBtn.innerHTML = "&#8634;";
+    });
+  }
+
+  document.getElementById("mySidenav").style.width = "250px";
+  setActive(document.getElementsByClassName("active")[0]);
+  adjustMenuPosition();
+}
+
+function closeNav() {
+  document.getElementById("mySidenav").style.width = "0";
+}
+
+function setActive(element) {
+  // if there is an active item return
+  if (element != null && element.classList.contains("active"))
+    return;
+  // Remove the border from any previously selected items.
+  var activeItems = document.querySelectorAll(".sidenav a.active");
+  for (var i = 0; i < activeItems.length; i++) {
+    activeItems[i].classList.remove("active");
+  }
+
+  // Add the border to the newly selected item.
+  if (element != null) {
+    element.classList.add("active");
+
+    // play the video
+    var videoPlayer = document.getElementById("contentImage");
+    var videoUrl = element.getAttribute("data-video-url");
+    videoPlayer.setAttribute("src", videoUrl);
+    videoPlayer.play();
+  }
+
+
+}
+
+// Add this function to your JavaScript
+function adjustMenuPosition() {
+  var contentImage = document.getElementById("contentImage");
+  var sidenav = document.getElementById("mySidenav");
+  var paddingTop = parseInt(window.getComputedStyle(sidenav).getPropertyValue('padding-top'));
+  sidenav.style.top = contentImage.offsetTop + "px";
+  sidenav.style.height = (contentImage.offsetHeight - paddingTop) + "px";
+  // console.log("height: " );
+}
+
+// load M3U list with Promise function
+function loadM3U(url) {
+  return new Promise(function(resolve, reject) {
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", url);
+    xhr.onload = function() {
+      if (xhr.status === 200) {
+        // Parse the M3U file and extract the video sources
+        var m3uData = xhr.responseText;
+
+        var menuList = document.querySelector(".menu-items");
+
+        m3uData.split("\n").forEach(function(line) {
+          // Check if the line contains a video source
+          if (line.startsWith("#EXTINF")) {
+            // Extract the title and other attributes from the #EXTINF line
+            var attrs = {};
+            var title = "";
+            line.slice("#EXTINF:-1 ".length).split(",").forEach(function(attr) {
+              var parts = attr.split("=");
+              //attrs[parts[0]] = parts[1].replace(/"/g, "");
+              title = parts[0];
+            });
+
+            //var title = attrs["group-title"] + ", " + attrs["tvg-name"];
+            var videoUrl = m3uData.split(line)[1].split("\n")[1];
+
+            // Create a new menu item for the video source
+            var el = document.createElement("a");
+            el.innerHTML = title;
+            el.setAttribute("href", "#");
+            el.setAttribute("onclick", "setActive(this)");
+            el.setAttribute("data-video-url", videoUrl);
+
+            // Add the menu item to the list
+            menuList.appendChild(el);
+          }
+        });
+
+        resolve(Array.from(menuList.children));
+      } else {
+        reject(xhr.statusText);
+      }
+    };
+    xhr.onerror = function() {
+      reject(xhr.statusText);
+    };
+    xhr.send();
+  });
+}
+
+// refresh the menu by refresh button
+function refreshMenu() {
+  // Retrieve the list of menu items
+  var menuList = document.querySelector(".menu-items");
+
+  // Remove all menu items starting from the sixth item
+  while (menuList.children.length >= 4) {  // 0,1,2,3
+    menuList.removeChild(menuList.children[3]);
+  }
+  
+  // Call openNave() reload menu list
+  openNav();
+
+}
+
+// Add an event listener to the window object to adjust the menu position when the page loads
+window.addEventListener("load", function() {
+  adjustMenuPosition();
+});
+
+var contentImage = document.getElementById("contentImage");
+//contentImage.addEventListener("loadedmetadata", adjustMenuPosition);
+//contentImage.addEventListener("canplaythrough", adjustMenuPosition);
+window.addEventListener("resize", adjustMenuPosition);
+
+</script>
+   
+</body>
+</html> 
