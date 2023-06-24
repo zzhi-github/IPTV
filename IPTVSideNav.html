@@ -13,17 +13,20 @@ body {
   position: absolute;
   z-index: 1;
   top: 0;
-  left: 0;
-//  background-color: #111;
-  background-color: rgba(0, 0, 0, 0.8);
-//  backdrop-filter: blur(20px);
-//  -webkit-backdrop-filter: blur(20px);
-  backdrop-filter: blur(20px);
+/**  left: 0; **/
   overflow-x: hidden;
   overflow-y: hidden;
   transition: 0.5s;
   padding-top: 60px;
 }
+
+.sidenav.active {
+  width: 250px;
+  background: rgba(0, 0, 0, 0.6);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
 
 .sidenav a {
   padding: 8px 8px 8px 32px;
@@ -114,7 +117,7 @@ function openNav() {
     // Call loadM3U() to fetch the video sources and generate the menu
     var refreshBtn = document.querySelector(".refresh-btn");
     var fontsize = window.getComputedStyle(refreshBtn).getPropertyValue("font-size");
-    refreshBtn.style.fontSize = "10px";
+    refreshBtn.style.fontSize = "15px";
     refreshBtn.innerHTML = "Loading ...";
     loadM3U("https://live.fanmingming.com/tv/m3u/ipv6.m3u").then(function() {
       refreshBtn.style.fontSize = fontsize;
@@ -126,13 +129,13 @@ function openNav() {
     });
   }
 
-  document.getElementById("mySidenav").style.width = "250px";
+  document.getElementById("mySidenav").classList.add("active");
   setActive(document.getElementsByClassName("active")[0]);
   adjustMenuPosition();
 }
 
 function closeNav() {
-  document.getElementById("mySidenav").style.width = "0";
+  document.getElementById("mySidenav").classList.remove("active");
 }
 
 function setActive(element) {
